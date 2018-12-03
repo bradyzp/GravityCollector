@@ -1,0 +1,17 @@
+[Unit]
+Description=uWSGI Service Runner for GravityRepo REST API
+After=network.target
+
+[Service]
+User=gravityrepo
+Group=www-data
+PermissionsStartOnly=True
+RuntimeDirectory=uwsgi
+WorkingDirectory=/opt/gravityrepo/
+RuntimeDirectory=uwsgi
+Environment="PATH=/opt/gravityrepo/venv/bin"
+EnvironmentFile=/opt/gravityrepo/environment
+ExecStart=/opt/gravityrepo/venv/bin/uwsgi --ini uwsgi.ini
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,5 @@
+include uwsgi.ini
+include wsgi.py
+include gravityrepo.service
+
+recursive-include gravrepo *.*

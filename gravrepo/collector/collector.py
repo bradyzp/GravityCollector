@@ -16,19 +16,22 @@ class CollectorView(MethodView):
     @api_key_guard(write=True)
     def post(self, sid: int):
         data = request.json
-        # data['datetime'] = datetime.fromtimestamp(data['datetime'])
-        data['datetime'] = datetime.now()
-        line = Data(sensor_id=sid, **data)
-        db.session.add(line)
+        _log.info(f'Received {request.content_length} bytes of data')
+        count = 0
+        for line in data['data']:
+            # data['datetime'] = datetime.fromtimestamp(data['datetime'])
+            line['datetime'] = datetime.now()
+            payload = Data(sensor_id=sid, **line)
+            db.session.add(payload)
+            count += 1
 
         try:
             db.session.commit()
         except DataError:
-            _log.exception("Exception comitting line")
+            _log.exception("Exception committing line")
             return jsonify({"Status": "FAIL"})
         else:
-
-            return jsonify({"Status": 'OK', "LineID": line.line_id})
+            return jsonify({'Status': 'OK', 'Count': count})
 
 
 collector_blueprint = Blueprint('collector_bp', __name__, url_prefix='/collect/')

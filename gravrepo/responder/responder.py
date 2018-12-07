@@ -7,7 +7,7 @@ import logging
 from flask import Blueprint, request, jsonify
 from flask.views import MethodView
 
-from ..models import db, Data
+from ..models import db, Data, Sensor
 
 _log = logging.getLogger(__name__)
 
@@ -74,6 +74,39 @@ class ResponderView(MethodView):
             return jsonify({"data": data, "sensor": sid})
 
 
+class SensorListView(MethodView):
+    def get(self):
+        cfg_fields = request.args.get('fields', None)
+        if cfg_fields is not None:
+            cfg_fields = cfg_fields.split(',')
+
+        sensors: List[Sensor] = db.session.query(Sensor)
+        data = []
+        for sensor in sensors:
+            config = sensor.config
+            if config is not None:
+                cfg_data = config.to_dict(cfg_fields)
+            else:
+                cfg_data = {}
+            sdata = {"name": sensor.sensor_name,
+                     "type": sensor.sensor_type,
+                     "id": sensor.sensor_id,
+                     "config": cfg_data
+                     }
+            last_line: Data = db.session.query(Data) \
+                .filter_by(sensor_id=sensor.sensor_id) \
+                .order_by(Data.datetime.desc()) \
+                .first()
+            if last_line is not None:
+                sdata['lastdata'] = last_line.datetime.timestamp()
+
+            data.append(sdata)
+
+        return jsonify(data)
+
+
 responder_blueprint = Blueprint('responder_bp', __name__, url_prefix='/view/')
 responder_view = ResponderView.as_view('responder_view')
+sensor_list_view = SensorListView.as_view('sensor_list_view')
 responder_blueprint.add_url_rule('/<int:sid>/<int:startdate>', view_func=responder_view)
+responder_blueprint.add_url_rule('/list', view_func=sensor_list_view)

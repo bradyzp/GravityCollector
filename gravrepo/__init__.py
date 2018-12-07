@@ -32,7 +32,6 @@ def make_app(config_file=None) -> Flask:
     app = Flask('gravrepo', instance_relative_config=True)
     app.config.from_object('gravrepo.DefaultConfig')
     # app.config.from_pyfile(config_file, silent=False)
-    print(f'Flask root is: {app.instance_path}')
 
     @app.before_request
     def before():

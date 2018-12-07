@@ -10,11 +10,11 @@ requires = [
 ]
 
 setup(
-    name='GravityRepo',
-    version='0.1.0alpha-4',
+    name='GravityCollector',
+    version='0.2.1alpha-1',
     packages=find_packages(),
     package_data={
-        '': ['uwsgi.ini', 'wsgi.py', 'gravityrepo.service']
+        '': ['uwsgi.ini', 'wsgi.py', 'gravitycollector.service']
     },
     include_package_data=True,
     install_requires=requires,
